@@ -23,6 +23,7 @@ export class CartModel {
     this.events?.emit("cart:changed");
   }
 
+
   clear(): void {
     this.items = [];
     this.events?.emit("cart:changed");
