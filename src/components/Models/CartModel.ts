@@ -1,43 +1,51 @@
 import { IProduct } from "../../types";
-import { EventEmitter } from "../base/Events";
 
 export class CartModel {
+
   private items: IProduct[] = [];
-  private events?: EventEmitter;
+// Массив товаров, добавленных в корзину.
 
-  constructor(events?: EventEmitter) {
-    this.events = events;
-  }
-
+// Методы класса:
   getItems(): IProduct[] {
     return this.items;
   }
+// Возвращает массив товаров корзины.
 
   addItem(product: IProduct): void {
     this.items.push(product);
-    this.events?.emit("cart:changed");
   }
+// Добавляет товар в корзину.
 
   removeItem(product: IProduct): void {
-    this.items = this.items.filter((item) => item.id !== product.id);
-    this.events?.emit("cart:changed");
+    this.items = this.items.filter(item => item.id !== product.id);
   }
-
+// Удаляет товар из корзины.
 
   clear(): void {
     this.items = [];
-    this.events?.emit("cart:changed");
   }
+// Полностью очищает корзину.
 
   getTotal(): number {
-    return this.items.reduce((total, item) => total + (item.price ?? 0), 0);
+    let total = 0;
+    for (const item of this.items) {
+      if (item.price !== null) {
+        total += item.price;
+      } }
+    return total;
   }
+// Возвращает суммарную стоимость всех товаров.
 
   getCount(): number {
     return this.items.length;
   }
+// Возвращает количество товаров.
 
   hasItem(id: string): boolean {
-    return this.items.some((item) => item.id === id);
+    if (this.items.find(item => item.id === id)) {
+      return true;
+    }
+    return false;
   }
+// Проверяет, есть ли товар с таким id.
 }

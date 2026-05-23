@@ -1,40 +1,35 @@
 import { IProduct } from "../../types";
-import { EventEmitter } from "../base/Events";
-
 export class CatalogModel {
-  private products: IProduct[] = [];
-  private selectedProductId: string | null = null;
-  private events?: EventEmitter;
 
-  constructor(events?: EventEmitter) {
-    this.events = events;
-  }
+  private products: IProduct[]= [];
+// Хранит все товары, полученные с сервера.
+  private selectedProduct: IProduct | null = null;
+// Хранит товар, выбранный пользователем для подробного просмотра.
 
+// Методы класса:
   setProducts(products: IProduct[]): void {
     this.products = products;
-    this.events?.emit("catalog:changed"); // без данных
   }
+// Сохраняет массив товаров.
 
   getProducts(): IProduct[] {
     return this.products;
   }
+// Возвращает массив товаров каталога.
 
   getProductById(id: string): IProduct | undefined {
-    return this.products.find((p) => p.id === id);
+    return this.products.find(product => product.id === id);
   }
+// Ищет товар по id.
 
-  setSelectedProductById(id: string): void {
-    this.selectedProductId = id;
-    this.events?.emit("catalog:select"); // без данных
+  setSelectedProduct(product: IProduct): void {
+    this.selectedProduct = product;
   }
+// Сохраняет выбранный товар.
 
   getSelectedProduct(): IProduct | null {
-    if (!this.selectedProductId) return null;
-    return this.getProductById(this.selectedProductId) ?? null;
+    return this.selectedProduct;
   }
+// Возвращает товар для подробного отображения.
 
-  clearSelected(): void {
-    this.selectedProductId = null;
-    this.events?.emit("catalog:select");
-  }
 }
