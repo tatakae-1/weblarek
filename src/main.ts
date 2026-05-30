@@ -1,105 +1,110 @@
 import "./scss/styles.scss";
 
-import { BuyerModel } from "./components/Models/BuyerModel";
-import { CatalogModel } from "./components/Models/CatalogModel";
-import { CartModel } from "./components/Models/CartModel";
-import { apiProducts } from "./utils/data";
-import { ApiService } from "./components/Models/ApiService";
-import { Api } from "./components/base/Api";
-import { API_URL } from "./utils/constants";
 
-// Инициализация Api и ApiService
+import { Catalog } from './components/Models/Catalog';
+import { Cart } from './components/Models/Cart';
+import { Customer } from './components/Models/Customer';
+import { apiProducts } from "./utils/data";
+import { Api } from './components/base/Api';
+import { API_URL } from "./utils/constants";
+import { ApiService } from './components/Models/ApiService';
+
+const catalog = new Catalog();
+const cart = new Cart();
+const customer = new Customer();
 const api = new Api(API_URL);
 const apiService = new ApiService(api);
 
-const buyerModel = new BuyerModel();
-const catalogModel = new CatalogModel();
-const cartModel = new CartModel();
+// Проверка каталога
+catalog.saveProducts(apiProducts.items);
+catalog.selectProduct(apiProducts.items[0]);
 
-console.log("");
-// Тестируем CatalogModel
-console.log("Сохраняем массив товаров методом setProducts");
-catalogModel.setProducts(apiProducts.items);
-console.log("Возвращаем массив товаров методом getProducts");
-console.log("Массив товаров из каталога:", catalogModel.getProducts());
-console.log("Ищем товар по его ID методом getProductById");
-catalogModel.getProductById("854cef69-976d-4c2a-a18c-2aa45046c390");
 console.log(
-  "Возвращаем товар для подробного отображения методом getProductById",
-  catalogModel.getProductById("854cef69-976d-4c2a-a18c-2aa45046c390")
+  'Товары каталога:',
+  catalog.getProducts()
 );
 
-console.log("");
-
-// Тестируем BuyerModel
-console.log("Сохраняем данные покупателя методом setField");
-buyerModel.setField("email", "example@mail.ru");
-buyerModel.setField("phone", "+1234567890");
-buyerModel.setField("address", "Улица Пушкина, дом Колотушкина");
-buyerModel.setField("payment", "card");
-console.log("Возвращаем данные покупателя методом getData");
-console.log("Данные покупателя:", buyerModel.getData());
-console.log("Проверяем валидацию данных покупателя методом validate");
-console.log("Ошибки валидации:", buyerModel.validate());
-console.log("Очищаем данные покупателя методом clear");
-buyerModel.clear();
-console.log("Данные покупателя после очистки:", buyerModel.getData());
-console.log("Проверяем валидацию данных покупателя методом validate");
-console.log("Ошибки валидации:", buyerModel.validate());
-
-console.log("");
-
-// Тестируем CartModel
-console.log("Добавляем товары в корзину методом addItem");
-cartModel.addItem(
-  catalogModel.getProductById("854cef69-976d-4c2a-a18c-2aa45046c390")!
-);
-console.log("Возвращаем товары из корзины методом getItems");
-console.log("Товары в корзине:", cartModel.getItems());
-console.log("Добавляем еще один товар в корзину методом addItem");
-cartModel.addItem(
-  catalogModel.getProductById("412bcf81-7e75-4e70-bdb9-d3c73c9803b7")!
-);
-console.log("Товары в корзине:", cartModel.getItems());
 console.log(
-  "Общее количество товаров в корзине методом getCount:",
-  cartModel.getCount()
+  'Товар по id:',
+  catalog.findProduct(apiProducts.items[0].id)
 );
-console.log(
-  "Общая стоимость товаров в корзине методом getTotal:",
-  cartModel.getTotal()
-);
-console.log(
-  "Проверяем наличие товара в корзине методом hasItem:",
-  cartModel.hasItem("854cef69-976d-4c2a-a18c-2aa45046c390")
-);
-console.log("Удаляем товар из корзины методом removeItem");
-cartModel.removeItem(
-  catalogModel.getProductById("854cef69-976d-4c2a-a18c-2aa45046c390")!
-);
-console.log("Товары в корзине после удаления:", cartModel.getItems());
-console.log("Очищаем корзину методом clear");
-cartModel.clear();
-console.log("Товары в корзине после очистки:", cartModel.getItems());
 
-const catalogModelApi = new CatalogModel();
-console.log("");
-// Тестируем ApiService использует новый каталог catalogModelApi для текстирования
-console.log("Получаем каталог товаров с сервера методом fetchProducts");
+console.log(
+  'Выбранный товар:',
+  catalog.getSelectedProduct()
+);
 
+// Проверка корзины
+cart.addProduct(apiProducts.items[0]);
+cart.addProduct(apiProducts.items[0]);
+cart.clearCart();
+cart.removeProduct(apiProducts.items[0]);
+
+console.log(
+  'Корзина:',
+  cart.getItems()
+);
+
+console.log(
+  'Количество товаров:',
+  cart.getItemsCount()
+);
+
+console.log(
+  'Общая стоимость:',
+  cart.calculateTotal()
+);
+
+console.log(
+  'Товар есть в корзине:',
+  cart.containsProduct(apiProducts.items[0].id)
+);
+
+
+console.log(
+  'После удаления:',
+  cart.getItems()
+);
+
+console.log(
+  'После очистки корзины:',
+  cart.getItems()
+);
+
+// Проверка покупателя
+customer.updateField('email', 'test@mail.ru');
+customer.updateField('phone', '+79999999999');
+customer.updateField('address', 'Москва');
+customer.updateField('payment', 'card');
+customer.resetData();
+
+console.log(
+  'После очистки данных:',
+  customer.getCustomerData()
+);
+
+console.log(
+  'Данные покупателя:',
+  customer.getCustomerData()
+);
+
+console.log(
+  'Ошибки валидации:',
+  customer.validateForm()
+);
+
+// test api
 apiService
-  .fetchProducts()
+  .loadProducts()
   .then((products) => {
-    console.log("Товары, полученные с сервера:", products);
-    catalogModelApi.setProducts(products);
-    console.log("Каталог из catalogModelApi:", catalogModelApi.getProducts());
+    catalog.saveProducts(products);
+
     console.log(
-      "Сохраним первый элемент из каталога методом setSelectedProduct"
+      'Каталог, полученный с сервера:',
+      catalog.getProducts()
     );
-    catalogModelApi.setSelectedProduct(catalogModelApi.getProducts()[0]);
-    console.log("Выводим выбранный товар методом getSelectedProduct");
-    console.log("Выбранный товар:", catalogModelApi.getSelectedProduct());
   })
   .catch((error) => {
-    console.error("Ошибка при получении товаров с сервера:", error);
+    console.error(error);
   });
+

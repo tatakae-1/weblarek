@@ -5,30 +5,19 @@ export interface IApi {
     post<T extends object>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
 }
 
-export interface IProductsResponse {
-    total: number;
-    items: IProduct[];
-}
+export type TPayment = 'card' | 'cash' | null;
 
-export interface IOrderRequest extends IBuyer {
-    total: number;
-    items: string[];
-}
-
-export interface IOrderResponse {
-    id: string;
-    total: number;
-}
-
+// Информация о товаре
 export interface IProduct {
     id: string;
-    description: string;
-    image: string;
     title: string;
+    description: string;
     category: string;
+    image: string;
     price: number | null;
 }
 
+// Данные покупателя
 export interface IBuyer {
     payment: TPayment | null;
     email: string;
@@ -36,4 +25,20 @@ export interface IBuyer {
     address: string;
 }
 
-export type TPayment = 'card' | 'cash';
+// Ответ сервера со списком товаров
+export interface IProductsResponse {
+    total: number;
+    items: IProduct[];
+}
+
+// Данные для создания заказа
+export interface IOrderRequest extends IBuyer {
+    total: number;
+    items: string[];
+}
+
+// Ответ после успешного оформления заказа
+export interface IOrderResponse {
+    id: string;
+    total: number;
+}
