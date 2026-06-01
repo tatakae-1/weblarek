@@ -5,7 +5,7 @@ export interface IApi {
     post<T extends object>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
 }
 
-export type TPayment = 'card' | 'cash' | null;
+export type TPayment = 'card' | 'cash';
 
 // Информация о товаре
 export interface IProduct {
@@ -25,6 +25,9 @@ export interface IBuyer {
     address: string;
 }
 
+export type TValidationErrors =
+  Partial<Record<keyof IBuyer, string>>;
+
 // Ответ сервера со списком товаров
 export interface IProductsResponse {
     total: number;
@@ -36,6 +39,8 @@ export interface IOrderRequest extends IBuyer {
     total: number;
     items: string[];
 }
+
+
 
 // Ответ после успешного оформления заказа
 export interface IOrderResponse {

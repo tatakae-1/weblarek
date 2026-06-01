@@ -1,6 +1,5 @@
 import {
   IApi,
-  IProduct,
   IProductsResponse,
   IOrderRequest,
   IOrderResponse
@@ -13,11 +12,8 @@ export class ApiService {
   ) {}
 
   // Получение каталога товаров
-  async loadProducts(): Promise<IProduct[]> {
-    const response =
-      await this.api.get<IProductsResponse>('/product/');
-
-    return response.items;
+  async loadProducts(): Promise<IProductsResponse> {
+    return this.api.get<IProductsResponse>('/product/');
   }
 
   // Отправка данных заказа

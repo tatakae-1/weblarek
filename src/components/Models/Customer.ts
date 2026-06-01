@@ -1,4 +1,7 @@
-import { IBuyer } from "../../types";
+import {
+  IBuyer,
+  TValidationErrors
+} from '../../types';
 
 export class Customer {
 
@@ -33,8 +36,8 @@ export class Customer {
   }
 
   // Выполняет проверку заполнения формы
-  validateForm(): Record<string, string> {
-    const validationErrors: Record<string, string> = {};
+  validateForm(): TValidationErrors {
+    const validationErrors: TValidationErrors = {};
 
     if (!this.customerData.payment) {
       validationErrors.payment = 'Выберите способ оплаты';

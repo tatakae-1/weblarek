@@ -34,14 +34,14 @@ console.log(
   catalog.getSelectedProduct()
 );
 
+
 // Проверка корзины
+
 cart.addProduct(apiProducts.items[0]);
-cart.addProduct(apiProducts.items[0]);
-cart.clearCart();
-cart.removeProduct(apiProducts.items[0]);
+cart.addProduct(apiProducts.items[1]);
 
 console.log(
-  'Корзина:',
+  'Товары в корзине:',
   cart.getItems()
 );
 
@@ -60,11 +60,18 @@ console.log(
   cart.containsProduct(apiProducts.items[0].id)
 );
 
+// Удаление товара
+
+cart.removeProduct(apiProducts.items[0]);
 
 console.log(
-  'После удаления:',
+  'После удаления товара:',
   cart.getItems()
 );
+
+// Очистка корзины
+
+cart.clearCart();
 
 console.log(
   'После очистки корзины:',
@@ -72,16 +79,11 @@ console.log(
 );
 
 // Проверка покупателя
+
 customer.updateField('email', 'test@mail.ru');
 customer.updateField('phone', '+79999999999');
 customer.updateField('address', 'Москва');
 customer.updateField('payment', 'card');
-customer.resetData();
-
-console.log(
-  'После очистки данных:',
-  customer.getCustomerData()
-);
 
 console.log(
   'Данные покупателя:',
@@ -93,18 +95,24 @@ console.log(
   customer.validateForm()
 );
 
-// test api
-apiService
-  .loadProducts()
-  .then((products) => {
-    catalog.saveProducts(products);
+// Очистка данных
+customer.resetData();
 
-    console.log(
-      'Каталог, полученный с сервера:',
-      catalog.getProducts()
-    );
-  })
-  .catch((error) => {
-    console.error(error);
+console.log(
+  'После очистки данных:',
+  customer.getCustomerData()
+);
+
+console.log(
+  'Ошибки после очистки:',
+  customer.validateForm()
+);
+
+// test api
+apiService.loadProducts()
+  .then((data) => {
+    catalog.saveProducts(data.items);
+
+    console.log(catalog.getProducts());
   });
 
