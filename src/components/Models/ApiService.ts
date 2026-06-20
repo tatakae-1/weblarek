@@ -1,30 +1,34 @@
-import {
-  IApi,
-  IProductsResponse,
-  IOrderRequest,
-  IOrderResponse
-} from '../../types';
+import { Api } from '../base/Api';
+import { IOrder, IProduct } from './AppState';
 
-export class ApiService {
+export interface IOrderResult {
+  id: string;
+  total: number;
+}
 
-  constructor(
-    private readonly api: IApi
-  ) {}
+export class ApiService extends Api {
+  readonly cdn: string;
 
-  // Получение каталога товаров
-  async loadProducts(): Promise<IProductsResponse> {
-    return this.api.get<IProductsResponse>('/product/');
+  constructor(cdn: string, baseUrl: string, options?: RequestInit) {
+    // Передаем baseUrl в родительский класс Api
+    super(baseUrl, options);
+    this.cdn = cdn;
   }
 
-  // Отправка данных заказа
-  async submitOrder(
-    order: IOrderRequest
-  ): Promise<IOrderResponse> {
-    return this.api.post<IOrderResponse>(
-      '/order/',
-      order,
-      'POST'
+  // Получить список товаров с сервера
+  getProductList(): Promise<IProduct[]> {
+    return this.get<{ total: number, items: IProduct[] }>('/product').then((data) =>
+      data.items.map((item) => ({
+        ...item,
+        image: this.cdn + item.image
+      }))
+    );
+  }
+
+  // Отправить заказ на сервер
+  orderProducts(order: IOrder): Promise<IOrderResult> {
+    return this.post<IOrderResult>('/order', order).then(
+      (data) => data
     );
   }
 }
-
