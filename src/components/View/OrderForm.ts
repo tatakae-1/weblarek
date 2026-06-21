@@ -14,8 +14,8 @@ export class OrderForm extends Form<IOrderForm> {
     this._buttons = Array.from(container.querySelectorAll('.button_alt'));
     this._buttons.forEach(button => {
       button.addEventListener('click', () => {
-        this.payment = button.name;
-        this.events.emit('order.payment:change', { field: 'payment', value: button.name });
+        const paymentMethod = button.name || (button.textContent?.includes('Онлайн') ? 'card' : 'cash');
+        this.events.emit('order.payment:change', { field: 'payment', value: paymentMethod });
       });
     });
   }

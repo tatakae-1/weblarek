@@ -1,34 +1,25 @@
-import { IProduct } from "../../types";
+import { IProduct } from '../../types';
+import { IEvents } from '../base/Events';
 
 export class Catalog {
+  protected products: IProduct[] = [];
+  protected selectedProduct: IProduct | null = null;
 
-  private catalogItems: IProduct[] = [];
-  // Каталог товаров
+  constructor(protected events: IEvents) {}
 
-  private currentProduct: IProduct | null = null;
-
-  // Сохраняет список товаров
-  saveProducts(products: IProduct[]): void {
-    this.catalogItems = products;
+  saveProducts(products: IProduct[]) {
+    this.products = products;
+    this.events.emit('items:changed', this.products);
   }
 
-  // Возвращает все товары каталога
-  getProducts(): IProduct[] {
-    return this.catalogItems;
+  getProducts() { return this.products; }
+
+  findProduct(id: string) { return this.products.find(item => item.id === id); }
+
+  selectProduct(product: IProduct) {
+    this.selectedProduct = product;
+    this.events.emit('preview:changed', this.selectedProduct);
   }
 
-  // поиск товара по id
-  findProduct(id: string): IProduct | undefined {
-    return this.catalogItems.find(item => item.id === id);
-  }
-
-  // Устанавливает активный товар
-  selectProduct(product: IProduct): void {
-    this.currentProduct = product;
-  }
-
-  // Возвращает выбранный товар
-  getSelectedProduct(): IProduct | null {
-    return this.currentProduct;
-  }
+  getSelectedProduct() { return this.selectedProduct; }
 }
