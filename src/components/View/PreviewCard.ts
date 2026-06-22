@@ -7,7 +7,6 @@ export class PreviewCard extends CatalogCard {
 
   constructor(container: HTMLElement, actions?: ICardActions) {
     super(container, actions);
-    // Добавляем то, чего нет в CatalogCard
     this._description = ensureElement<HTMLElement>('.card__text', container);
   }
 

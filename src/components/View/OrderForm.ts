@@ -11,10 +11,14 @@ export class OrderForm extends Form<IOrderForm> {
 
   constructor(container: HTMLFormElement, events: IEvents) {
     super(container, events);
+
     this._buttons = Array.from(container.querySelectorAll('.button_alt'));
+
     this._buttons.forEach(button => {
       button.addEventListener('click', () => {
-        const paymentMethod = button.name || (button.textContent?.includes('Онлайн') ? 'card' : 'cash');
+        const isOnline = button.textContent?.toLowerCase().includes('онлайн');
+        const paymentMethod = isOnline ? 'card' : 'cash';
+
         this.events.emit('order.payment:change', { field: 'payment', value: paymentMethod });
       });
     });
@@ -26,7 +30,10 @@ export class OrderForm extends Form<IOrderForm> {
 
   set payment(name: string) {
     this._buttons.forEach(button => {
-      if (button.name === name) {
+      const isOnline = button.textContent?.toLowerCase().includes('онлайн');
+      const paymentMethod = isOnline ? 'card' : 'cash';
+
+      if (paymentMethod === name) {
         button.classList.add('button_alt-active');
       } else {
         button.classList.remove('button_alt-active');

@@ -44,12 +44,10 @@ const header = new Header(ensureElement<HTMLElement>('.header'), events);
 const gallery = new Gallery(ensureElement<HTMLElement>('.gallery'));
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 
-// Переиспользуемые компоненты (Создаются строго один раз)
+// Переиспользуемые компоненты
 const basketView = new Basket(cloneTemplate(basketTemplate), events);
 const orderFormView = new OrderForm(cloneTemplate(orderTemplate), events);
 const contactsFormView = new ContactsForm(cloneTemplate(contactsTemplate), events);
-
-// ИСПРАВЛЕНИЕ: Представление успеха создается единожды
 const successView = new Success(cloneTemplate(successTemplate), {
   onClick: () => modal.close()
 });
@@ -79,8 +77,6 @@ events.on('preview:changed', (item: IProduct) => {
 events.on('product:toggle', (item: IProduct) => {
   if (cartModel.containsProduct(item.id)) cartModel.removeProduct(item);
   else cartModel.addProduct(item);
-
-  // Вызываем обновление превью для смены текста на кнопке карточки
   events.emit('preview:changed', item);
 });
 
@@ -97,7 +93,6 @@ events.on('basket:changed', (items: IProduct[]) => {
   });
 });
 
-// 4. Открытие корзины
 events.on('basket:open', () => {
   modal.render({ content: basketView.render() });
 });
@@ -131,33 +126,45 @@ events.on(/^contacts\..*:change/, (data: { field: keyof IOrder, value: string })
   customerModel.updateField(data.field, data.value);
 });
 
-// 8. Обновление ошибок валидации
-events.on('formErrors:change', (errors: Partial<IOrder>) => {
-  const { payment, address, email, phone } = errors;
-  orderFormView.valid = !payment && !address;
-  orderFormView.errors = Object.values({ payment, address }).filter(i => !!i).join('; ');
+// 8. ИСПРАВЛЕНИЕ: Единое событие изменения данных покупателя
+events.on('customer:changed', (data: IOrder) => {
+  // Записываем обновленные поля напрямую в представления
+  orderFormView.payment = data.payment;
+  orderFormView.address = data.address;
+  contactsFormView.email = data.email;
+  contactsFormView.phone = data.phone;
 
-  contactsFormView.valid = !email && !phone;
-  contactsFormView.errors = Object.values({ email, phone }).filter(i => !!i).join('; ');
+  // Вызываем общую валидацию модели
+  const errors = customerModel.validateForm();
+
+  // Обновляем валидность и ошибки для первой формы
+  orderFormView.valid = !errors.payment && !errors.address;
+  orderFormView.errors = Object.values({ payment: errors.payment, address: errors.address }).filter(i => !!i).join('; ');
+
+  // Обновляем валидность и ошибки для второй формы
+  contactsFormView.valid = !errors.email && !errors.phone;
+  contactsFormView.errors = Object.values({ email: errors.email, phone: errors.phone }).filter(i => !!i).join('; ');
 });
 
 // 9. Отправка заказа
 events.on('contacts:submit', () => {
-  const orderData = customerModel.getCustomerData();
-  orderData.total = cartModel.calculateTotal();
-  orderData.items = cartModel.getItems().map(item => item.id);
+  const orderPayload: IOrder = {
+    payment: customerModel.getCustomerData().payment,
+    email: customerModel.getCustomerData().email,
+    phone: customerModel.getCustomerData().phone,
+    address: customerModel.getCustomerData().address,
+    total: cartModel.calculateTotal(),
+    items: cartModel.getItems().map(item => item.id)
+  };
 
-  api.orderProducts(orderData)
+  // Выводим в консоль для проверки
+  console.log('Отправляем на сервер:', orderPayload);
+
+  api.orderProducts(orderPayload)
     .then((result) => {
-      // Рендерим окно успеха из глобальной переменной
       modal.render({ content: successView.render({ total: result.total }) });
-
       cartModel.clearCart();
       customerModel.resetData();
-
-      // Очищаем формы визуально, чтобы они были пустыми для следующего заказа
-      orderFormView.render({ payment: '', address: '', valid: false, errors: [] });
-      contactsFormView.render({ email: '', phone: '', valid: false, errors: [] });
     })
     .catch(console.error);
 });
